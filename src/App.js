@@ -17,6 +17,7 @@ export default function App() {
   const fetchRandomCountry = () => {
     const randomCountry =
       countryListNames[Math.floor(Math.random() * countryListNames.length)]
+    console.log(randomCountry)
     setTargetWord(randomCountry)
     setCountryItems(
       [
@@ -37,7 +38,7 @@ export default function App() {
 
   const onGuess = () => {
     if (!countryNamesSet.has(guessText.toLowerCase())) {
-      setErrorMessage("sry bro not a country")
+      setErrorMessage(`"${guessText}" is not in our dataset`)
     } else if (guessText.toLowerCase() === targetWord.toLowerCase()) {
       setDidWin(true)
       setErrorMessage("")
@@ -54,7 +55,7 @@ export default function App() {
   return (
     <div className="main-app-container">
       <div className="header">
-        <Text>2:23</Text>
+        <Text weight={700}>2:23</Text>
         <Text
           size="lg"
           variant="gradient"
@@ -86,12 +87,32 @@ export default function App() {
         {countryItems.map((country) => {
           if (country === targetWord) {
             if (didWin) {
-              return <li key={country}>You got it! - {country}</li>
+              return (
+                <li key={country}>
+                  <Text color="teal" weight={700}>
+                    You got it! 🎉🎉🎉
+                  </Text>
+                  <Text weight={700}>
+                    {countryData[country]} {country}
+                  </Text>
+                </li>
+              )
+            }
+            if (didGiveUp) {
+              return (
+                <li key={country}>
+                  <Text color="red" weight={700}>
+                    You gave up 😞. Correct answer:
+                  </Text>
+                  <Text weight={700}>
+                    {countryData[country]} {country}
+                  </Text>
+                </li>
+              )
             }
             return (
-              <li style={{ margin: "12px 0" }}>
+              <li key={country} style={{ margin: "12px 0" }}>
                 <TextInput
-                  key={country}
                   style={{ width: 300 }}
                   placeholder="Type guess here"
                   value={guessText}
@@ -103,20 +124,24 @@ export default function App() {
                     }
                   }}
                 />
+                {errorMessage ? (
+                  <Text color="red" size="sm">
+                    {errorMessage}
+                  </Text>
+                ) : null}
               </li>
             )
           }
 
           return (
-            <li className="country-item" key={country}>
-              {countryData[country]} {country}
+            <li key={country}>
+              <Text>
+                {countryData[country]} {country}
+              </Text>
             </li>
           )
         })}
       </ul>
-      {didGiveUp
-        ? `You gave up. :( the word we were looking for: ${targetWord}`
-        : null}
 
       <Button
         color="red"
