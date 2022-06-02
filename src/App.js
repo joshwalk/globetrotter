@@ -18,7 +18,13 @@ export default function App() {
     const randomCountry =
       countryListNames[Math.floor(Math.random() * countryListNames.length)]
     setTargetWord(randomCountry)
-    setCountryItems([randomCountry])
+    setCountryItems(
+      [
+        ...countryListNames.slice(0, 4),
+        ...countryListNames.slice(150, 153),
+        randomCountry,
+      ].sort((a, b) => a.localeCompare(b))
+    )
   }
 
   useEffect(() => {
@@ -55,12 +61,13 @@ export default function App() {
           gradient={{ from: "teal", to: "blue", deg: 45 }}
           weight={700}
         >
-          Globetrotter
+          globetrotter
         </Text>
 
         <div>
           <Button
             color="teal"
+            variant="outline"
             size="xs"
             radius="lg"
             onClick={() => {
@@ -75,38 +82,52 @@ export default function App() {
           </Button>
         </div>
       </div>
-
-      {countryItems.map((country) => {
-        if (country === targetWord) {
-          if (didWin) {
-            return <li key={country}>You got it! - {country}</li>
+      <ul>
+        {countryItems.map((country) => {
+          if (country === targetWord) {
+            if (didWin) {
+              return <li key={country}>You got it! - {country}</li>
+            }
+            return (
+              <li style={{ margin: "12px 0" }}>
+                <TextInput
+                  key={country}
+                  style={{ width: 300 }}
+                  placeholder="Type guess here"
+                  value={guessText}
+                  onChange={(e) => setGuessText(e.currentTarget.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      onGuess()
+                    }
+                  }}
+                />
+              </li>
+            )
           }
+
           return (
-            <TextInput
-              key={country}
-              style={{ width: 300 }}
-              placeholder="Type guess here"
-              value={guessText}
-              onChange={(e) => setGuessText(e.currentTarget.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault()
-                  onGuess()
-                }
-              }}
-              error={errorMessage ? errorMessage : null}
-            />
+            <li className="country-item" key={country}>
+              {countryData[country]} {country}
+            </li>
           )
-        }
-
-        return <li key={country}>{country}</li>
-      })}
-
+        })}
+      </ul>
       {didGiveUp
         ? `You gave up. :( the word we were looking for: ${targetWord}`
         : null}
 
-      <button onClick={() => setDidGiveUp(true)}>give up</button>
+      <Button
+        color="red"
+        variant="outline"
+        size="xs"
+        radius="lg"
+        onClick={() => setDidGiveUp(true)}
+        style={{ marginTop: 16 }}
+      >
+        give up
+      </Button>
     </div>
   )
 }
