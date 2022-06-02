@@ -36,16 +36,19 @@ export default function App() {
   )
 
   const onGuess = () => {
-    if (!countryNamesSet.has(guessText.toLowerCase())) {
+    if (!countryNamesSet.has(guessText.toLowerCase().trim())) {
       setErrorMessage(`"${guessText}" is not in our dataset`)
-    } else if (guessText.toLowerCase() === targetWord.toLowerCase()) {
+    } else if (guessText.toLowerCase().trim() === targetWord.toLowerCase()) {
       setDidWin(true)
       pause()
       setErrorMessage("")
     } else {
-      const sortedItems = [...countryItems, guessText].sort((a, b) =>
-        a.localeCompare(b)
-      )
+      const sortedItems = [
+        ...countryItems,
+        countryListNames.find(
+          (c) => c.toLowerCase() === guessText.toLowerCase().trim()
+        ),
+      ].sort((a, b) => a.localeCompare(b))
       setCountryItems(sortedItems)
       setErrorMessage("")
     }
@@ -108,7 +111,7 @@ export default function App() {
               return (
                 <li key={country}>
                   <Text color="red" weight={700}>
-                    You gave up 😞. Correct answer:
+                    Correct answer:
                   </Text>
                   <Text weight={700}>
                     {countryData[country]} {country}
@@ -119,12 +122,14 @@ export default function App() {
             return (
               <li key={country} style={{ margin: "12px 0" }}>
                 <TextInput
+                  autoFocus
+                  type="text"
+                  autoCapitalize="words"
                   placeholder="Type guess here"
                   value={guessText}
                   onChange={(e) => setGuessText(e.currentTarget.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
-                      e.preventDefault()
                       onGuess()
                     }
                   }}
