@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { TextInput } from "@mantine/core"
+import { Button, Text, TextInput } from "@mantine/core"
 import "./App.scss"
 import countryData from "./country-data"
 
@@ -46,19 +46,34 @@ export default function App() {
   }
 
   return (
-    <div className="App">
-      <div>
-        <button
-          onClick={() => {
-            setCountryItems([])
-            setDidWin(false)
-            setDidGiveUp(false)
-            setErrorMessage("")
-            fetchRandomCountry()
-          }}
+    <div className="main-app-container">
+      <div className="header">
+        <Text>2:23</Text>
+        <Text
+          size="lg"
+          variant="gradient"
+          gradient={{ from: "teal", to: "blue", deg: 45 }}
+          weight={700}
         >
-          reset
-        </button>
+          Globetrotter
+        </Text>
+
+        <div>
+          <Button
+            color="teal"
+            size="xs"
+            radius="lg"
+            onClick={() => {
+              setCountryItems([])
+              setDidWin(false)
+              setDidGiveUp(false)
+              setErrorMessage("")
+              fetchRandomCountry()
+            }}
+          >
+            reset
+          </Button>
+        </div>
       </div>
 
       {countryItems.map((country) => {
