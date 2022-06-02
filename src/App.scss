@@ -16,6 +16,10 @@
   align-items: center;
   position: sticky;
   top: 0;
+
+  > * {
+    flex: 1;
+  }
 }
 
 ul {

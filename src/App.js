@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react"
 import { Button, Text, TextInput } from "@mantine/core"
+import { useStopwatch } from "react-timer-hook"
 import "./App.scss"
 import countryData from "./country-data"
 
 export default function App() {
+  const { seconds, minutes, isRunning, start, pause, reset } = useStopwatch({
+    autoStart: true,
+  })
+
   const [guessText, setGuessText] = useState("")
   const [targetWord, setTargetWord] = useState()
   const [didWin, setDidWin] = useState(false)
@@ -19,13 +24,7 @@ export default function App() {
       countryListNames[Math.floor(Math.random() * countryListNames.length)]
     console.log(randomCountry)
     setTargetWord(randomCountry)
-    setCountryItems(
-      [
-        ...countryListNames.slice(0, 4),
-        ...countryListNames.slice(150, 153),
-        randomCountry,
-      ].sort((a, b) => a.localeCompare(b))
-    )
+    setCountryItems([randomCountry])
   }
 
   useEffect(() => {
@@ -41,6 +40,7 @@ export default function App() {
       setErrorMessage(`"${guessText}" is not in our dataset`)
     } else if (guessText.toLowerCase() === targetWord.toLowerCase()) {
       setDidWin(true)
+      pause()
       setErrorMessage("")
     } else {
       const sortedItems = [...countryItems, guessText].sort((a, b) =>
@@ -55,25 +55,30 @@ export default function App() {
   return (
     <div className="main-app-container">
       <div className="header">
-        <Text weight={700}>2:23</Text>
+        <Text
+          weight={700}
+          color={didWin ? "green" : didGiveUp ? "red" : undefined}
+        >{`${minutes}:${seconds.toString().padStart(2, "0")}`}</Text>
         <Text
           size="lg"
           variant="gradient"
-          gradient={{ from: "teal", to: "blue", deg: 45 }}
+          gradient={{ from: "green", to: "blue", deg: 45 }}
           weight={700}
+          style={{ textAlign: "center" }}
         >
           globetrotter
         </Text>
 
-        <div>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button
-            color="teal"
+            color="green"
             variant="outline"
             size="xs"
             radius="lg"
             onClick={() => {
               setCountryItems([])
               setDidWin(false)
+              reset()
               setDidGiveUp(false)
               setErrorMessage("")
               fetchRandomCountry()
@@ -89,7 +94,7 @@ export default function App() {
             if (didWin) {
               return (
                 <li key={country}>
-                  <Text color="teal" weight={700}>
+                  <Text color="green" weight={700}>
                     You got it! 🎉🎉🎉
                   </Text>
                   <Text weight={700}>
@@ -143,16 +148,21 @@ export default function App() {
         })}
       </ul>
 
-      <Button
-        color="red"
-        variant="outline"
-        size="xs"
-        radius="lg"
-        onClick={() => setDidGiveUp(true)}
-        style={{ marginTop: 16 }}
-      >
-        give up
-      </Button>
+      {didWin || didGiveUp ? null : (
+        <Button
+          color="red"
+          variant="outline"
+          size="xs"
+          radius="lg"
+          onClick={() => {
+            setDidGiveUp(true)
+            pause()
+          }}
+          style={{ marginTop: 16 }}
+        >
+          give up
+        </Button>
+      )}
     </div>
   )
 }
