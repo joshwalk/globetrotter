@@ -5,7 +5,7 @@ import "./App.scss"
 import countryData from "./country-data"
 
 export default function App() {
-  const { seconds, minutes, isRunning, start, pause, reset } = useStopwatch({
+  const { seconds, minutes, pause, reset } = useStopwatch({
     autoStart: true,
   })
 
@@ -36,18 +36,18 @@ export default function App() {
   )
 
   const onGuess = () => {
-    if (!countryNamesSet.has(guessText.toLowerCase().trim())) {
-      setErrorMessage(`"${guessText}" is not in our dataset`)
-    } else if (guessText.toLowerCase().trim() === targetWord.toLowerCase()) {
+    const trimmedText = guessText.toLowerCase().trim()
+
+    if (!countryNamesSet.has(trimmedText)) {
+      setErrorMessage("sry bro that's not in our dataset 😕")
+    } else if (trimmedText === targetWord.toLowerCase()) {
       setDidWin(true)
       pause()
       setErrorMessage("")
     } else {
       const sortedItems = [
         ...countryItems,
-        countryListNames.find(
-          (c) => c.toLowerCase() === guessText.toLowerCase().trim()
-        ),
+        countryListNames.find((c) => c.toLowerCase() === trimmedText),
       ].sort((a, b) => a.localeCompare(b))
       setCountryItems(sortedItems)
       setErrorMessage("")
