@@ -1,99 +1,97 @@
-import { useEffect, useState } from "react";
-import "./App.css";
-import countryData from "./country-data";
-
-const WordList = ({ words }) => {
-  return (
-    <ul>
-      {words.map((word) => (
-        <li key={word}>
-          {countryData[word]} {word}
-        </li>
-      ))}
-    </ul>
-  );
-};
+import { useEffect, useState } from "react"
+import { TextInput } from "@mantine/core"
+import "./App.scss"
+import countryData from "./country-data"
 
 export default function App() {
-  const [guessText, setGuessText] = useState("");
-  const [targetWord, setTargetWord] = useState();
-  const [beforeWords, setBeforeWords] = useState([]);
-  const [afterWords, setAfterWords] = useState([]);
-  const [didWin, setDidWin] = useState(false);
-  const [didGiveUp, setDidGiveUp] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [guessText, setGuessText] = useState("")
+  const [targetWord, setTargetWord] = useState()
+  const [didWin, setDidWin] = useState(false)
+  const [didGiveUp, setDidGiveUp] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
-  const countryList = Object.keys(countryData);
+  const [countryItems, setCountryItems] = useState([])
 
-  const fetchData = () => {
-    const randomWord =
-      countryList[Math.floor(Math.random() * countryList.length)];
-    setTargetWord(randomWord);
-  };
+  const countryListNames = Object.keys(countryData)
+
+  const fetchRandomCountry = () => {
+    const randomCountry =
+      countryListNames[Math.floor(Math.random() * countryListNames.length)]
+    setTargetWord(randomCountry)
+    setCountryItems([randomCountry])
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchRandomCountry()
+  }, [])
 
-  const dataAsSet = new Set(countryList.map((word) => word.toLowerCase()));
+  const countryNamesSet = new Set(
+    countryListNames.map((word) => word.toLowerCase())
+  )
 
   const onGuess = () => {
-    if (!dataAsSet.has(guessText.toLowerCase())) {
-      setErrorMessage("sry bro not a country");
+    if (!countryNamesSet.has(guessText.toLowerCase())) {
+      setErrorMessage("sry bro not a country")
     } else if (guessText.toLowerCase() === targetWord.toLowerCase()) {
-      setDidWin(true);
-      setErrorMessage("");
-    } else if (guessText.toLowerCase() < targetWord.toLowerCase()) {
-      setBeforeWords((state) => [...state, guessText]);
-      setErrorMessage("");
-    } else if (guessText.toLowerCase() > targetWord.toLowerCase()) {
-      setAfterWords((state) => [guessText, ...state]);
-      setErrorMessage("");
+      setDidWin(true)
+      setErrorMessage("")
+    } else {
+      const sortedItems = [...countryItems, guessText].sort((a, b) =>
+        a.localeCompare(b)
+      )
+      setCountryItems(sortedItems)
     }
 
-    setGuessText("");
-  };
+    setGuessText("")
+  }
 
   return (
     <div className="App">
       <div>
         <button
           onClick={() => {
-            setBeforeWords([]);
-            setAfterWords([]);
-            setDidWin(false);
-            setDidGiveUp(false);
-            setErrorMessage("");
-            fetchData();
+            setCountryItems([])
+            setDidWin(false)
+            setDidGiveUp(false)
+            setErrorMessage("")
+            fetchRandomCountry()
           }}
         >
           reset
         </button>
       </div>
-      <WordList words={beforeWords} />
-      {didWin ? (
-        `Winner! 🎉 ${targetWord}`
-      ) : (
-        <>
-          <input
-            type="text"
-            value={guessText}
-            onChange={(e) => setGuessText(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                onGuess();
-              }
-            }}
-          />
-          <button onClick={onGuess}>guess</button>
-        </>
-      )}
+
+      {countryItems.map((country) => {
+        if (country === targetWord) {
+          if (didWin) {
+            return <li key={country}>You got it! - {country}</li>
+          }
+          return (
+            <TextInput
+              key={country}
+              style={{ width: 300 }}
+              placeholder="Type guess here"
+              value={guessText}
+              onChange={(e) => setGuessText(e.currentTarget.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  onGuess()
+                }
+              }}
+              error={errorMessage ? errorMessage : null}
+            />
+          )
+        }
+
+        return <li key={country}>{country}</li>
+      })}
+
       {didGiveUp
         ? `You gave up. :( the word we were looking for: ${targetWord}`
         : null}
-      {errorMessage ? errorMessage : null}
-      <WordList words={afterWords} />
+
       <button onClick={() => setDidGiveUp(true)}>give up</button>
     </div>
-  );
+  )
 }
