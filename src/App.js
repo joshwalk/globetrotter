@@ -47,6 +47,7 @@ export default function App() {
         a.localeCompare(b)
       )
       setCountryItems(sortedItems)
+      setErrorMessage("")
     }
 
     setGuessText("")
@@ -118,7 +119,6 @@ export default function App() {
             return (
               <li key={country} style={{ margin: "12px 0" }}>
                 <TextInput
-                  style={{ width: 300 }}
                   placeholder="Type guess here"
                   value={guessText}
                   onChange={(e) => setGuessText(e.currentTarget.value)}
