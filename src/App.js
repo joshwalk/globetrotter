@@ -3,6 +3,7 @@ import { Button, Text, TextInput } from "@mantine/core"
 import { useStopwatch } from "react-timer-hook"
 import "./App.scss"
 import countryData from "./country-data"
+import HelpModal from "./HelpModal"
 
 export default function App() {
   const { seconds, minutes, pause, reset } = useStopwatch({
@@ -14,6 +15,7 @@ export default function App() {
   const [didWin, setDidWin] = useState(false)
   const [didGiveUp, setDidGiveUp] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [showHelpModal, setShowHelpModal] = useState(false)
 
   const [countryItems, setCountryItems] = useState([])
 
@@ -22,7 +24,6 @@ export default function App() {
   const fetchRandomCountry = () => {
     const randomCountry =
       countryListNames[Math.floor(Math.random() * countryListNames.length)]
-    console.log(randomCountry)
     setTargetWord(randomCountry)
     setCountryItems([randomCountry])
   }
@@ -39,7 +40,7 @@ export default function App() {
     const trimmedText = guessText.toLowerCase().trim()
 
     if (!countryNamesSet.has(trimmedText)) {
-      setErrorMessage("sry bro that's not in our dataset 😕")
+      setErrorMessage("We couldn't find that guess in our database 😕")
     } else if (trimmedText === targetWord.toLowerCase()) {
       setDidWin(true)
       pause()
@@ -57,117 +58,134 @@ export default function App() {
   }
 
   return (
-    <div className="main-app-container">
-      <div className="header">
-        <Text
-          weight={700}
-          color={didWin ? "green" : didGiveUp ? "red" : undefined}
-        >{`${minutes}:${seconds.toString().padStart(2, "0")}`}</Text>
-        <Text
-          size="lg"
-          variant="gradient"
-          gradient={{ from: "green", to: "blue", deg: 45 }}
-          weight={700}
-          style={{ textAlign: "center" }}
-        >
-          globetrotter
-        </Text>
-
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            color="green"
-            variant="outline"
-            size="xs"
-            radius="lg"
-            onClick={() => {
-              setCountryItems([])
-              setDidWin(false)
-              reset()
-              setDidGiveUp(false)
-              setErrorMessage("")
-              fetchRandomCountry()
-            }}
+    <>
+      <div className="main-app-container">
+        <div className="header">
+          <Text
+            weight={700}
+            color={didWin ? "green" : didGiveUp ? "red" : undefined}
+          >{`${minutes}:${seconds.toString().padStart(2, "0")}`}</Text>
+          <Text
+            size="lg"
+            variant="gradient"
+            gradient={{ from: "green", to: "blue", deg: 45 }}
+            weight={700}
+            style={{ textAlign: "center" }}
           >
-            reset
-          </Button>
+            globetrotter
+          </Text>
+
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              variant="outline"
+              size="xs"
+              radius="lg"
+              onClick={() => setShowHelpModal(true)}
+            >
+              how to
+            </Button>
+          </div>
         </div>
-      </div>
-      <ul>
-        {countryItems.map((country) => {
-          if (country === targetWord) {
-            if (didWin) {
+        <ul>
+          {countryItems.map((country) => {
+            if (country === targetWord) {
+              if (didWin) {
+                return (
+                  <li key={country}>
+                    <Text color="green" weight={700}>
+                      You got it! 🎉🎉🎉
+                    </Text>
+                    <Text weight={700}>
+                      {countryData[country]} {country}
+                    </Text>
+                  </li>
+                )
+              }
+              if (didGiveUp) {
+                return (
+                  <li key={country}>
+                    <Text color="red" weight={700}>
+                      Correct answer:
+                    </Text>
+                    <Text weight={700}>
+                      {countryData[country]} {country}
+                    </Text>
+                  </li>
+                )
+              }
               return (
-                <li key={country}>
-                  <Text color="green" weight={700}>
-                    You got it! 🎉🎉🎉
-                  </Text>
-                  <Text weight={700}>
-                    {countryData[country]} {country}
-                  </Text>
+                <li key={country} style={{ margin: "12px 0" }}>
+                  <TextInput
+                    autoFocus
+                    type="text"
+                    autoCapitalize="words"
+                    placeholder="type guess here and press enter"
+                    value={guessText}
+                    onChange={(e) => setGuessText(e.currentTarget.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        onGuess()
+                      }
+                    }}
+                  />
+                  {errorMessage ? (
+                    <Text color="red" size="sm">
+                      {errorMessage}
+                    </Text>
+                  ) : null}
                 </li>
               )
             }
-            if (didGiveUp) {
-              return (
-                <li key={country}>
-                  <Text color="red" weight={700}>
-                    Correct answer:
-                  </Text>
-                  <Text weight={700}>
-                    {countryData[country]} {country}
-                  </Text>
-                </li>
-              )
-            }
+
             return (
-              <li key={country} style={{ margin: "12px 0" }}>
-                <TextInput
-                  autoFocus
-                  type="text"
-                  autoCapitalize="words"
-                  placeholder="Type guess here"
-                  value={guessText}
-                  onChange={(e) => setGuessText(e.currentTarget.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      onGuess()
-                    }
-                  }}
-                />
-                {errorMessage ? (
-                  <Text color="red" size="sm">
-                    {errorMessage}
-                  </Text>
-                ) : null}
+              <li key={country}>
+                <Text>
+                  {countryData[country]} {country}
+                </Text>
               </li>
             )
-          }
+          })}
+        </ul>
 
-          return (
-            <li key={country}>
-              <Text>
-                {countryData[country]} {country}
-              </Text>
-            </li>
-          )
-        })}
-      </ul>
-
-      {didWin || didGiveUp ? null : (
-        <Button
-          color="red"
-          variant="outline"
-          size="xs"
-          radius="lg"
-          onClick={() => {
-            setDidGiveUp(true)
-            pause()
-          }}
-          style={{ marginTop: 16 }}
-        >
-          give up
-        </Button>
-      )}
-    </div>
+        <div style={{ display: "flex", marginTop: "1em" }}>
+          {didWin || didGiveUp ? (
+            <Button
+              style={{ marginRight: "0.5em" }}
+              color="green"
+              variant="outline"
+              size="xs"
+              radius="lg"
+              onClick={() => {
+                setCountryItems([])
+                setDidWin(false)
+                reset()
+                setDidGiveUp(false)
+                setErrorMessage("")
+                fetchRandomCountry()
+              }}
+            >
+              play again
+            </Button>
+          ) : (
+            <Button
+              color="red"
+              variant="outline"
+              size="xs"
+              radius="lg"
+              onClick={() => {
+                setDidGiveUp(true)
+                pause()
+              }}
+            >
+              give up
+            </Button>
+          )}
+        </div>
+      </div>
+      <HelpModal
+        showHelpModal={showHelpModal}
+        setShowHelpModal={setShowHelpModal}
+      />
+    </>
   )
 }
