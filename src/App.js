@@ -4,6 +4,7 @@ import { useStopwatch } from "react-timer-hook"
 import "./App.scss"
 import countryData from "./country-data"
 import HelpModal from "./HelpModal"
+import Header from "./Header"
 
 export default function App() {
   const { seconds, minutes, pause, reset } = useStopwatch({
@@ -60,32 +61,13 @@ export default function App() {
   return (
     <>
       <div className="main-app-container">
-        <div className="header">
-          <Text
-            weight={700}
-            color={didWin ? "green" : didGiveUp ? "red" : undefined}
-          >{`${minutes}:${seconds.toString().padStart(2, "0")}`}</Text>
-          <Text
-            size="lg"
-            variant="gradient"
-            gradient={{ from: "green", to: "blue", deg: 45 }}
-            weight={700}
-            style={{ textAlign: "center" }}
-          >
-            globetrotter
-          </Text>
-
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="outline"
-              size="xs"
-              radius="lg"
-              onClick={() => setShowHelpModal(true)}
-            >
-              how to
-            </Button>
-          </div>
-        </div>
+        <Header
+          didWin={didWin}
+          didGiveUp={didGiveUp}
+          minutes={minutes}
+          seconds={seconds}
+          setShowHelpModal={setShowHelpModal}
+        />
         <ul>
           {countryItems.map((country) => {
             if (country === targetWord) {
@@ -114,7 +96,7 @@ export default function App() {
                 )
               }
               return (
-                <li key={country} style={{ margin: "12px 0" }}>
+                <li key={country} style={{ margin: "0.5em 0" }}>
                   <TextInput
                     autoFocus
                     type="text"
